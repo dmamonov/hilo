@@ -21,8 +21,9 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
     protected List<Thing> things = new ArrayList<>();
     protected int health = 100;
 
-
-
+    public List<Thing> getThings() {
+        return things;
+    }
 
     public GameMap.Direction getDirection() {
         return direction;
@@ -104,9 +105,14 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
     public boolean act() {
         if (!things.isEmpty()) {
             for (final Usable usable : Iterables.filter(map.list(position.translate(direction)), Usable.class)) {
-                if (usable.use(things)){
+                if (usable.use(this)){
                     return true;
                 }
+            }
+        }
+        for (final Usable usable : Iterables.filter(map.list(position), Usable.class)) {
+            if (usable.use(this)){
+                return true;
             }
         }
         return false;
@@ -211,6 +217,13 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
         @Override
         public Ansi render() {
             return ansi().fgBright(MAGENTA).a('$');
+        }
+    }
+
+    public static class SmallEnemy extends Actor {
+        @Override
+        public Ansi render() {
+            return ansi().fgBright(MAGENTA).a('s');
         }
     }
 

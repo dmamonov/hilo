@@ -2,7 +2,6 @@ package org.hilo.core.engine;
 
 import com.google.inject.Singleton;
 
-import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -13,7 +12,7 @@ public abstract class GameObject {
     private static final AtomicInteger sequence = new AtomicInteger();
     private final int hash = sequence.incrementAndGet();
     public interface Usable {
-        boolean use(final Collection<Thing> things);
+        boolean use(Actor actor);
     }
 
     public interface Damageable {

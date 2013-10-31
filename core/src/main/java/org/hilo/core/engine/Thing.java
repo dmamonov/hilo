@@ -12,6 +12,11 @@ public abstract class Thing extends GameMap.MapUnit {
         return true;
     }
 
+    @Override
+    public boolean isFall() {
+        return true;
+    }
+
     public static class Key extends Thing{
         @Override
         public Ansi render() {

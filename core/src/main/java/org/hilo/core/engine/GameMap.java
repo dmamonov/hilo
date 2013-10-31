@@ -275,10 +275,14 @@ public class GameMap {
         final Map<Character, Class<? extends MapUnit>> mapping = ImmutableMap.<Character, Class<? extends MapUnit>>builder()
                 .put('P', Actor.Player.class)
                 .put('E', Actor.Enemy.class)
+                .put('e', Actor.SmallEnemy.class)
                 .put('W', Block.Rock.class)
                 .put('D', Door.Locked.class)
                 .put('K', Thing.Key.class)
                 .put('_', Ammo.Mine.class)
+                .put('>', Transport.TravelatorRight.class)
+                .put('<', Transport.TravelatorLeft.class)
+                .put('T', Transport.Teleport.class)
                 .build();
         if (lines != null) {
             int y = 0;

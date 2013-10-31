@@ -3,8 +3,6 @@ package org.hilo.core.engine;
 import com.google.common.collect.Iterables;
 import org.fusesource.jansi.Ansi;
 
-import java.util.Collection;
-
 import static org.fusesource.jansi.Ansi.ansi;
 
 /**
@@ -20,8 +18,6 @@ public abstract class Door extends GameMap.MapUnit {
     }
 
     public static class Locked extends Door implements Usable {
-
-
         @Override
         public Ansi renderBackground() {
             return ansi().bgBright(Ansi.Color.BLACK);
@@ -40,11 +36,11 @@ public abstract class Door extends GameMap.MapUnit {
         }
 
         @Override
-        public boolean use(final Collection<Thing> things) {
+        public boolean use(final Actor actor) {
             if (locked){
-                final Thing.Key key = Iterables.getFirst(Iterables.filter(things, Thing.Key.class), null);
+                final Thing.Key key = Iterables.getFirst(Iterables.filter(actor.getThings(), Thing.Key.class), null);
                 if (key!=null) {
-                    things.remove(key);
+                    actor.getThings().remove(key);
                     locked =false;
                     return true;
                 }
