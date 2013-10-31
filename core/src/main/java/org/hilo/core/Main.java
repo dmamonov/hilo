@@ -3,6 +3,10 @@ package org.hilo.core;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.sshd.SshServer;
+import org.hilo.core.engine.AI;
+import org.hilo.core.engine.GameMap;
+import org.hilo.core.engine.GameRenderer;
+import org.hilo.core.engine.GameTime;
 import org.hilo.core.engine.HiloModule;
 
 import java.io.File;
@@ -17,13 +21,22 @@ import static com.google.common.base.Charsets.US_ASCII;
  */
 public class Main {
     public static void main(final String[] args) throws IOException, InterruptedException {
-        System.out.println("NEW MAIN");
         final Injector injector = Guice.createInjector(new HiloModule());
         final SshServer ssh = injector.getInstance(SshServer.class);
         ssh.start();
-        final HiloModule.GameMap map = injector.getInstance(HiloModule.GameMap.class);
+        final GameMap map = injector.getInstance(GameMap.class);
+        final GameRenderer renderer = injector.getInstance(GameRenderer.class);
         map.init(73, 21, Files.readAllLines(new File("core/demo-map-01.txt").toPath(), US_ASCII));
-        System.out.println(map.render());
-        Thread.sleep(60*60*1000L);
+        Runtime.getRuntime().exec("putty.exe -load 1 me@localhost");
+        final GameTime time = injector.getInstance(GameTime.class);
+        final AI ai = injector.getInstance(AI.Randomized.class);
+        //noinspection InfiniteLoopStatement
+        while (true){
+            Thread.sleep(100L);
+            time.tick();
+            ai.think();
+            map.applyOperations();
+            renderer.update();
+        }
     }
 }
