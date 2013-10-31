@@ -1,4 +1,4 @@
-package ldrs.core;
+package org.hilo.core;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
