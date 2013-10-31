@@ -280,6 +280,7 @@ public class GameMap {
                 .put('D', Door.Locked.class)
                 .put('K', Thing.Key.class)
                 .put('_', Ammo.Mine.class)
+                .put('*', Ammo.Grenade.class)
                 .put('>', Transport.TravelatorRight.class)
                 .put('<', Transport.TravelatorLeft.class)
                 .put('T', Transport.Teleport.class)

@@ -44,7 +44,7 @@ public abstract class Weapon extends GameObject {
     }
 
     @Singleton
-    public static class Grenade extends Weapon {
+    public static class Bazooka extends Weapon {
         @Override
         protected GameMap.Position target(final Actor actor) {
             return actor.getPosition().translate(GameMap.Direction.Up).translate(actor.getDirection());
@@ -52,7 +52,7 @@ public abstract class Weapon extends GameObject {
 
         @Override
         protected Class<? extends Ammo> getAmmoType() {
-            return Ammo.Bomb.class;
+            return Ammo.Grenade.class;
         }
     }
 }

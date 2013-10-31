@@ -100,12 +100,32 @@ public abstract class Ammo extends GameMap.MapUnit {
         }
     }
 
-    public static class Bomb extends Ammo {
+    public static class Grenade extends Ammo {
+
+        @Override
+        protected void terminate() {
+            for(final GameMap.Direction around: GameMap.Direction.values()){
+                map.set(position.translate(around)).create(Effect.Explosion.class);
+            }
+        }
+
+        @Override
+        public void onCollide(final GameMap.Position position, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
+            makeDamage(collisions);
+            map.remove(this);
+            terminate();
+        }
 
         @Override
         public boolean isFall() {
             return true;
         }
+
+        @Override
+        protected int getDamage() {
+            return 50;
+        }
+
 
         @Override
         public Ansi render() {
