@@ -13,7 +13,7 @@ public abstract class GameObject {
     private static final AtomicInteger sequence = new AtomicInteger();
     private final int hash = sequence.incrementAndGet();
     public interface Usable {
-        void use(final Collection<Thing> things);
+        boolean use(final Collection<Thing> things);
     }
 
     public interface Damageable {

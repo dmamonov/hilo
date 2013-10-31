@@ -17,17 +17,22 @@ public abstract class AI extends GameObject {
     public static class Randomized extends AI {
         @Inject
         protected GameMap map;
+        @Inject
+        protected GameTime time;
         protected final Random random = new Random();
+
         @Override
         public void think() {
             for (final Actor.Enemy enemy : map.list(Actor.Enemy.class)) {
-                switch (random.nextInt(10)){
-                    case 0:
-                        enemy.left();
-                        break;
-                    case 1:
-                        enemy.right();
-                        break;
+                if (time.getClock()%7==0) {
+                    if (enemy.isMoved()) {
+                        enemy.step();
+                    } else {
+                        if (!enemy.act()) {
+                            enemy.rotate();
+                        }
+                        enemy.step();
+                    }
                 }
             }
 

@@ -25,6 +25,8 @@ import static com.google.common.collect.Iterables.*;
  */
 @Singleton
 public class GameMap {
+
+
     public enum Direction {
         Left(-1, 0) {
             @Override
@@ -128,6 +130,11 @@ public class GameMap {
         return mapObject;
     }
 
+    public void put(final MapUnit unit) {
+        unit.setPosition(positionProvider.get());
+        operations.add(new MapOperation(unit, null));
+    }
+
     public GameMap move(final MapUnit obj, final Direction moveTo) {
         checkNotNull(obj);
         checkNotNull(moveTo);
@@ -195,6 +202,7 @@ public class GameMap {
                     }
                     targetUnitList.add(unit);
                     unit.setPosition(targetPosition);
+                    unit.onMove();
                 }
             }
         }
@@ -270,6 +278,7 @@ public class GameMap {
                 .put('W', Block.Rock.class)
                 .put('D', Door.Locked.class)
                 .put('K', Thing.Key.class)
+                .put('_', Ammo.Mine.class)
                 .build();
         if (lines != null) {
             int y = 0;
@@ -363,7 +372,7 @@ public class GameMap {
 
     @Singleton
     protected static class DirectionProvider implements Provider<Direction> {
-        private Direction direction;
+        private Direction direction = Direction.Right;
 
         @Override
         public Direction get() {

@@ -60,6 +60,10 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
         this.health -= damage;
         if (health <= 0) {
             map.remove(this);
+            for (final Thing thing : things) {
+                map.set(position).put(thing);
+            }
+
         } else {
             map.set(position).create(Effect.Blood.class);
         }
@@ -97,12 +101,15 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
         map.move(this, GameMap.Direction.Down);
     }
 
-    public void act() {
+    public boolean act() {
         if (!things.isEmpty()) {
             for (final Usable usable : Iterables.filter(map.list(position.translate(direction)), Usable.class)) {
-                usable.use(things);
+                if (usable.use(things)){
+                    return true;
+                }
             }
         }
+        return false;
     }
 
 
@@ -175,8 +182,18 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
         protected boolean moved = false;
 
         @Override
+        public void onTick() {
+        }
+
+        @Override
         public void onMove() {
             this.moved = true;
+        }
+
+        @Override
+        public void step() {
+            super.step();
+            this.moved = false;
         }
 
         public boolean isMoved() {

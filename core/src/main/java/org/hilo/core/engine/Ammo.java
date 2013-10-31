@@ -18,7 +18,12 @@ public abstract class Ammo extends GameMap.MapUnit {
     protected GameMap.Direction direction;
 
     @Override
-    public boolean isCollideBack() {
+    public final boolean isCollideBack() {
+        return true;
+    }
+
+    @Override
+    public final boolean isAllowCrossing() {
         return true;
     }
 
@@ -31,13 +36,17 @@ public abstract class Ammo extends GameMap.MapUnit {
     }
 
     @Override
-    public final void onCollide(final GameMap.Position position, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
-        for (final Damageable damageable : Iterables.filter(collisions, Damageable.class)) {
-            damageable.damage(getDamage());
-        }
+    public void onCollide(final GameMap.Position position, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
+        makeDamage(collisions);
         if (!allowCrossing){
             map.remove(this);
             terminate();
+        }
+    }
+
+    protected void makeDamage(final List<GameMap.MapUnit> collisions) {
+        for (final Damageable damageable : Iterables.filter(collisions, Damageable.class)) {
+            damageable.damage(getDamage());
         }
     }
 
@@ -94,16 +103,39 @@ public abstract class Ammo extends GameMap.MapUnit {
     public static class Bomb extends Ammo {
 
         @Override
+        public boolean isFall() {
+            return true;
+        }
+
+        @Override
         public Ansi render() {
             return ansi().fgBright(YELLOW).a('*');
         }
     }
 
     public static class Mine extends Ammo {
+        @Override
+        protected void terminate() {
+            for(final GameMap.Direction around: GameMap.Direction.values()){
+                map.set(position.translate(around)).create(Effect.Explosion.class);
+            }
+        }
+
+        @Override
+        public void onCollide(final GameMap.Position position, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
+            makeDamage(collisions);
+            map.remove(this);
+            terminate();
+        }
+
+        @Override
+        protected int getDamage() {
+            return 99;
+        }
 
         @Override
         public Ansi render() {
-            return ansi().fg(RED).a('_');
+            return ansi().fgBright(RED).a('_');
         }
     }
 

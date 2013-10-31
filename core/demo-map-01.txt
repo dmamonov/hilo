@@ -6,7 +6,7 @@ W                                                                      W
 W                                                                      W
 W                                                                      W
 W                                                                      W
-W                               D      KDKEKKKD    K      D            W
+W                               D      E           K   _  D            W
 W                               WWWWWWWWWWWWWWWWWWWWWWWWWWWW           W
 W                                                                      W
 W                                                                      W
@@ -17,5 +17,5 @@ W                                                                      W
 W                                                                      W
 W                                                                      W
 W        W                 W                                           W
-W   E    D  K P   DK   E E D                                           W
+W   E    D  K P   DKK  E E D         _                                 W
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW

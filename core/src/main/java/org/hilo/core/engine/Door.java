@@ -40,14 +40,16 @@ public abstract class Door extends GameMap.MapUnit {
         }
 
         @Override
-        public void use(final Collection<Thing> things) {
+        public boolean use(final Collection<Thing> things) {
             if (locked){
                 final Thing.Key key = Iterables.getFirst(Iterables.filter(things, Thing.Key.class), null);
                 if (key!=null) {
                     things.remove(key);
                     locked =false;
+                    return true;
                 }
             }
+            return false;
         }
     }
 

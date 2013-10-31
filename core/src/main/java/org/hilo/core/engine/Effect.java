@@ -16,6 +16,10 @@ public abstract class Effect extends GameMap.MapUnit {
         }
     }
 
+    @Override
+    public final boolean isAllowCrossing() {
+        return true;
+    }
 
     @Override
     public final Ansi render() {
