@@ -1,4 +1,9 @@
 */target/**
+
+# Intellij
+.idea/
+*.iml
+*.iws
 **/*.iml
 *.lml
 .idea/**
