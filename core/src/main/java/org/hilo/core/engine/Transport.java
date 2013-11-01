@@ -152,7 +152,8 @@ public abstract class Transport extends GameMap.MapUnit {
                 Collections.shuffle(gates);
                 final Teleport gate = gates.get(0);
                 map.remove(actor);
-                time.scheduled(100, new Runnable() {
+                map.set(getPosition()).create(Effect.Appear.class);
+                time.scheduled(150, new Runnable() {
                     @Override
                     public void run() {
                         map.set(gate.getPosition());

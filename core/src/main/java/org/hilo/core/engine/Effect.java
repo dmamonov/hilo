@@ -46,7 +46,7 @@ public abstract class Effect extends GameMap.MapUnit {
 
     public static class Appear extends Effect {
         {
-            countdown = 15;
+            countdown = 25;
         }
         @Override
         public Ansi renderBackground() {
