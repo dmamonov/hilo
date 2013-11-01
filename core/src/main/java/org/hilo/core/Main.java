@@ -26,8 +26,10 @@ public class Main {
         ssh.start();
         final GameMap map = injector.getInstance(GameMap.class);
         final GameRenderer renderer = injector.getInstance(GameRenderer.class);
-        map.init(73, 21, Files.readAllLines(new File("core/demo-map-01.txt").toPath(), US_ASCII));
-        Runtime.getRuntime().exec("putty.exe -load 1 me@localhost");
+        map.init(73, 21, Files.readAllLines(new File("../core/demo-map-01.txt").getAbsoluteFile().toPath(), US_ASCII));
+        if (System.getProperty("os.name").toLowerCase().contains("windows")){
+            Runtime.getRuntime().exec("putty.exe -load 1  me@localhost");
+        }
         final GameTime time = injector.getInstance(GameTime.class);
         final AI ai = injector.getInstance(AI.Randomized.class);
         //noinspection InfiniteLoopStatement

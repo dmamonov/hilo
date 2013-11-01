@@ -35,9 +35,9 @@ public class SshServerProvider implements Provider<SshServer> {
     @Override
     public SshServer get() {
         final SshServer sshd = SshServer.setUpDefaultServer();
-        sshd.setPort(22);
+        sshd.setPort(2222);
         sshd.setUserAuthFactories(ImmutableList.<org.apache.sshd.common.NamedFactory<org.apache.sshd.server.UserAuth>>of(new UserAuthNone.Factory()));
-        sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("hilo.key"));
+        sshd.setKeyPairProvider(new SimpleGeneratorHostKeyProvider("../hilo.key"));
         sshd.setShellFactory(new Factory<Command>() {
             @Override
             public Command create() {
