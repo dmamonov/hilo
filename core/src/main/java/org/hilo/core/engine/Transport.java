@@ -52,11 +52,30 @@ public abstract class Transport extends GameMap.MapUnit {
 
     public static class Elevator extends Transport {
         @Inject
-        protected GameMap.Direction direction;
+        protected GameTime time;
+
+        @Override
+        public boolean isAllowCrossing() {
+            return true;
+        }
+
+        @Override
+        public boolean isHold() {
+            return true;
+        }
+
+        @Override
+        public void onTick() {
+            if (time.getClock() % 3 == 0) {
+                for (final Actor actor : map.list(getPosition(), Actor.class)) {
+                    map.move(actor, GameMap.Direction.Up);
+                }
+            }
+        }
 
         @Override
         public Ansi render() {
-            return ansi().a(GameMap.Direction.Up == direction ? 'u' : 'd');
+            return ansi().fg(Ansi.Color.BLUE).a('^');
         }
     }
 
