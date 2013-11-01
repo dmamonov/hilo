@@ -32,7 +32,7 @@ public abstract class Ammo extends GameMap.MapUnit {
     }
 
     protected void terminate(){
-        map.set(position).create(Effect.Explosion.class);
+        map.set(getPosition()).create(Effect.Explosion.class);
     }
 
     @Override
@@ -105,7 +105,7 @@ public abstract class Ammo extends GameMap.MapUnit {
         @Override
         protected void terminate() {
             for(final GameMap.Direction around: GameMap.Direction.values()){
-                map.set(position.translate(around)).create(Effect.Explosion.class);
+                map.set(getPosition().translate(around)).create(Effect.Explosion.class);
             }
         }
 
@@ -137,7 +137,7 @@ public abstract class Ammo extends GameMap.MapUnit {
         @Override
         protected void terminate() {
             for(final GameMap.Direction around: GameMap.Direction.values()){
-                map.set(position.translate(around)).create(Effect.Explosion.class);
+                map.set(getPosition().translate(around)).create(Effect.Explosion.class);
             }
         }
 

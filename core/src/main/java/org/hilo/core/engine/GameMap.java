@@ -237,27 +237,15 @@ public class GameMap {
             }
         }
         final boolean doFalls = time.getClock() % 3 == 0;
-        for (final MapUnit mapUnit : ImmutableList.copyOf(Iterables.concat(map.values()))) {
-            mapUnit.onTick();
+        for (final MapUnit unit : ImmutableList.copyOf(Iterables.concat(map.values()))) {
+            unit.onTick();
             if (doFalls) {
-                if (mapUnit.isFall()) {
-                    boolean hold = false;
-                    for (final MapUnit sameUnit : map.get(mapUnit.getPosition())) {
-                        if (sameUnit.isHold()){
-                            hold = true;
-                            break;
-                        }
-                    }
-                    if (!hold) {
-                        boolean doFall = true;
-                        for (final MapUnit underUnit : map.get(mapUnit.getPosition().translate(Direction.Down))) {
-                            if (!underUnit.isAllowCrossing()) {
-                                doFall = false;
-                                break;
-                            }
-                        }
-                        if (doFall || lastFalls.contains(mapUnit)) {
-                            operations.add(MapOperation.fall(mapUnit));
+                if (unit.isFall()) {
+                    final boolean holdStill = isHold(unit.getPosition());
+                    if (!holdStill) {
+                        final boolean doFall = isAllowCrossing(unit.getPosition().translate(Direction.Down));
+                        if (doFall || lastFalls.contains(unit)) {
+                            operations.add(MapOperation.fall(unit));
                         }
                     }
                 }
@@ -268,6 +256,23 @@ public class GameMap {
         }
     }
 
+    public boolean isAllowCrossing(final Position position){
+        for (final MapUnit unit : map.get(position)) {
+            if (!unit.isAllowCrossing()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isHold(final Position position){
+        for (final MapUnit unit : map.get(position)) {
+            if (unit.isHold()) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public GameMap set(final Position position) {
         positionProvider.set(position);
@@ -440,7 +445,7 @@ public class GameMap {
         @Inject
         protected GameMap map;
         @Inject
-        protected Position position;
+        private Position position;
 
 
         public Position getPosition() {

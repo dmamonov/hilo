@@ -62,11 +62,11 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
         if (health <= 0) {
             map.remove(this);
             for (final Thing thing : things) {
-                map.set(position).put(thing);
+                map.set(getPosition()).put(thing);
             }
 
         } else {
-            map.set(position).create(Effect.Blood.class);
+            map.set(getPosition()).create(Effect.Blood.class);
         }
     }
 
@@ -74,7 +74,7 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
         map.move(this, direction);
     }
 
-    public void rotate(){
+    public void rotate() {
         this.direction = this.direction.inverse();
     }
 
@@ -95,7 +95,9 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
     }
 
     public void climb() {
-        map.move(this, GameMap.Direction.Up);
+        if (map.isHold(getPosition().translate(GameMap.Direction.Up))){
+            map.move(this, GameMap.Direction.Up);
+        }
     }
 
     public void descend() {
@@ -104,20 +106,19 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
 
     public boolean act() {
         if (!things.isEmpty()) {
-            for (final Usable usable : Iterables.filter(map.list(position.translate(direction)), Usable.class)) {
-                if (usable.use(this)){
+            for (final Usable usable : Iterables.filter(map.list(getPosition().translate(direction)), Usable.class)) {
+                if (usable.use(this)) {
                     return true;
                 }
             }
         }
-        for (final Usable usable : Iterables.filter(map.list(position), Usable.class)) {
-            if (usable.use(this)){
+        for (final Usable usable : Iterables.filter(map.list(getPosition()), Usable.class)) {
+            if (usable.use(this)) {
                 return true;
             }
         }
         return false;
     }
-
 
 
     public static class Player extends Actor {
@@ -127,7 +128,7 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
         protected Weapon.Knife knife;
         protected Weapon tool;
         protected Weapon otherTool;
-        protected int momentum = 0;
+        protected int jumping = 0;
 
         @Override
         public Ansi render() {
@@ -136,14 +137,14 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
 
         @Override
         public void onTick() {
-            if (momentum > 0) {
-                momentum--;
+            if (jumping > 0) {
+                jumping--;
             }
         }
 
         @Override
         public boolean isFall() {
-            return momentum <= 0;
+            return jumping <= 0;
         }
 
         public void changeTool() {
@@ -164,11 +165,17 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
 
 
         public void jump() {
-            if (isFall()) {
-                momentum = 3;
-                map.move(this, GameMap.Direction.Up);
+            if (map.isHold(getPosition())) {
+                climb();
+            } else if (!map.isAllowCrossing(getPosition().translate(GameMap.Direction.Down))) {
+                if (jumping <= 0) {
+                    jumping = 3;
+                    map.move(this, GameMap.Direction.Up);
+                }
             }
+
         }
+
 
         @Override
         public String toString() {
@@ -179,7 +186,7 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
                     "  otherTool=" + otherTool + "\r\n" +
                     "  things=" + things + "\r\n" +
                     "  health=" + health + "\r\n" +
-                    "  momentum=" + momentum + "\r\n" +
+                    "  jumping=" + jumping + "\r\n" +
                     "}\r\n";
         }
     }

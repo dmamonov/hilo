@@ -69,7 +69,7 @@ public abstract class Transport extends GameMap.MapUnit {
         @Override
         public void onTick() {
             if (time.getClock() % 3 == 0) {
-                for (final Actor actor : map.list(position.translate(GameMap.Direction.Up), Actor.class)) {
+                for (final Actor actor : map.list(getPosition().translate(GameMap.Direction.Up), Actor.class)) {
                     map.move(actor, getDirection());
                 }
             }
