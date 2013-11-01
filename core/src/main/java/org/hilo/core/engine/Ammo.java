@@ -1,18 +1,15 @@
 package org.hilo.core.engine;
 
-import com.google.common.collect.Iterables;
 import com.google.inject.Inject;
-import org.fusesource.jansi.Ansi;
 
 import java.util.List;
 
-import static org.fusesource.jansi.Ansi.Color.*;
-import static org.fusesource.jansi.Ansi.ansi;
+import static org.hilo.core.utils.ListProxy.allVoid;
 
 /**
-* @author dmitry.mamonov
-*         Created: 10/31/13 10:57 PM
-*/
+ * @author dmitry.mamonov
+ *         Created: 10/31/13 10:57 PM
+ */
 public abstract class Ammo extends GameMap.MapUnit {
     @Inject
     protected GameMap.Direction direction;
@@ -27,26 +24,18 @@ public abstract class Ammo extends GameMap.MapUnit {
         return true;
     }
 
-    protected int getDamage(){
-        return 10;
-    }
-
-    protected void terminate(){
+    protected void terminate() {
         map.set(getPosition()).create(Effect.Explosion.class);
     }
 
+    protected abstract int getDamage();
+
     @Override
     public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
-        makeDamage(collisions);
-        if (!allowCrossing){
+        allVoid(Damageable.class, collisions).damage(getDamage());
+        if (!allowCrossing) {
             map.remove(this);
             terminate();
-        }
-    }
-
-    protected void makeDamage(final Iterable<GameMap.MapUnit> collisions) {
-        for (final Damageable damageable : Iterables.filter(collisions, Damageable.class)) {
-            damageable.damage(getDamage());
         }
     }
 
@@ -54,16 +43,16 @@ public abstract class Ammo extends GameMap.MapUnit {
         private int lifetime;
 
         @Override
-        public void onTick() {
-            lifetime--;
-            if (lifetime<0){
-                map.remove(this);
-            }
+        protected int getDamage() {
+            return 150;
         }
 
         @Override
-        protected int getDamage() {
-            return 1000;
+        public void onTick() {
+            lifetime--;
+            if (lifetime < 0) {
+                map.remove(this);
+            }
         }
 
         @Override
@@ -72,8 +61,8 @@ public abstract class Ammo extends GameMap.MapUnit {
         }
 
         @Override
-        public Ansi render() {
-            return ansi().fgBright(WHITE).a('-');
+        public View render() {
+            return new View(null, Paint.WHITE_BRIGHT, '-', false);
         }
     }
 
@@ -81,41 +70,57 @@ public abstract class Ammo extends GameMap.MapUnit {
         private int lifetime;
 
         @Override
+        protected int getDamage() {
+            return 25;
+        }
+
+        @Override
         public void onTick() {
-            if ((++lifetime)%3==0) {
+            if ((++lifetime) % 3 == 0) {
                 map.move(this, direction);
             }
         }
 
         @Override
-        public Ansi render() {
-            return ansi().fgBright(RED).a('·');
+        public View render() {
+            return new View(null, Paint.RED_BRIGHT, '·', false);
         }
     }
 
     public static class Rocket extends Ammo {
         @Override
-        public Ansi render() {
-            return ansi().fg(YELLOW).a(direction == GameMap.Direction.Left ? '⤛' : '⤜');
+        protected int getDamage() {
+            return 75;
+        }
+
+        @Override
+        public View render() {
+            return new View(null, Paint.YELLOW, direction == GameMap.Direction.Left ? '⤛' : '⤜', false);
         }
     }
 
     public static class Grenade extends Ammo {
+        @Override
+        protected int getDamage() {
+            return 50;
+        }
 
         @Override
         protected void terminate() {
-            for(final GameMap.Direction around: GameMap.Direction.values()){
+            for (final GameMap.Direction around : GameMap.Direction.values()) {
                 map.set(getPosition().translate(around)).create(Effect.Explosion.class);
             }
         }
 
         @Override
         public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
-            for(final GameMap.Direction around: GameMap.Direction.values()){
-                makeDamage(map.list(getPosition().translate(around)));
+            if (!allowCrossing) {
+                for (final GameMap.Direction around : GameMap.Direction.values()) {
+                    allVoid(Damageable.class, map.list(getPosition().translate(around))).damage(50);
+                }
+                map.remove(this);
+                terminate();
             }
-            map.remove(this);
-            terminate();
         }
 
         @Override
@@ -123,51 +128,51 @@ public abstract class Ammo extends GameMap.MapUnit {
             return true;
         }
 
-        @Override
-        protected int getDamage() {
-            return 50;
-        }
-
 
         @Override
-        public Ansi render() {
-            return ansi().fgBright(YELLOW).a('*');
+        public View render() {
+            return new View(null, Paint.YELLOW_BRIGHT, '*', false);
         }
     }
 
     public static class Mine extends Ammo {
-        @Override
-        protected void terminate() {
-            for(final GameMap.Direction around: GameMap.Direction.values()){
-                map.set(getPosition().translate(around)).create(Effect.Explosion.class);
-            }
-        }
-
-        @Override
-        public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
-            for(final GameMap.Direction around: GameMap.Direction.values()){
-                makeDamage(map.list(getPosition().translate(around)));
-            }
-            map.remove(this);
-            terminate();
-        }
-
         @Override
         protected int getDamage() {
             return 99;
         }
 
         @Override
-        public Ansi render() {
-            return ansi().fgBright(RED).a('_');
+        protected void terminate() {
+            for (final GameMap.Direction around : GameMap.Direction.values()) {
+                map.set(getPosition().translate(around)).create(Effect.Explosion.class);
+            }
+        }
+
+        @Override
+        public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
+            for (final GameMap.Direction around : GameMap.Direction.values()) {
+                allVoid(Damageable.class, map.list(getPosition().translate(around))).damage(getDamage());
+            }
+            map.remove(this);
+            terminate();
+        }
+
+        @Override
+        public View render() {
+            return new View(null, Paint.RED_BRIGHT, '_', true);
         }
     }
 
     public static class Dynamite extends Ammo {
 
         @Override
-        public Ansi render() {
-            return ansi().fg(RED).a('i');
+        protected int getDamage() {
+            return 500;
+        }
+
+        @Override
+        public View render() {
+            return new View(null, Paint.RED, 'i', false);
         }
     }
 }

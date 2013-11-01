@@ -11,7 +11,7 @@ import java.util.Random;
  */
 
 public abstract class AI extends GameObject {
-    public abstract void think();
+    public abstract void think(Character mind);
 
     @Singleton
     public static class Randomized extends AI {
@@ -22,7 +22,7 @@ public abstract class AI extends GameObject {
         protected final Random random = new Random();
 
         @Override
-        public void think() {
+        public void think(final Character mind) {
             for (final Actor.Enemy enemy : map.list(Actor.Enemy.class)) {
                 if (time.getClock()%7==0) {
                     if (enemy.isMoved()) {
@@ -36,6 +36,13 @@ public abstract class AI extends GameObject {
                 }
             }
 
+        }
+    }
+
+    public static class Human extends AI {
+        @Override
+        public void think(final Character mind) {
+            //TODO [DM]
         }
     }
 }

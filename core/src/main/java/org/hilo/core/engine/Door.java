@@ -1,9 +1,6 @@
 package org.hilo.core.engine;
 
 import com.google.common.collect.Iterables;
-import org.fusesource.jansi.Ansi;
-
-import static org.fusesource.jansi.Ansi.ansi;
 
 /**
 * @author dmitry.mamonov
@@ -14,10 +11,6 @@ public abstract class Door extends GameMap.MapUnit {
 
     public static class Locked extends Door implements Usable {
         private Thing.Key key = null;
-        @Override
-        public Ansi renderBackground() {
-            return ansi().bgBright(Ansi.Color.BLACK);
-        }
 
         @Override
         public boolean isAllowCrossing() {
@@ -26,12 +19,11 @@ public abstract class Door extends GameMap.MapUnit {
 
 
         @Override
-        public Ansi render() {
-            if (!isAllowCrossing()) {
-                return ansi().fgBright(Ansi.Color.BLUE).bold().a('D');
+        public View render() {
+            if (isAllowCrossing()) {
+                return new View(Paint.BLACK_BRIGHT,Paint.BLACK,'k',false);
             } else {
-                return ansi().fg(Ansi.Color.BLACK).a('k');
-
+                return new View(Paint.BLACK_BRIGHT,Paint.BLUE_BRIGHT,'D',true);
             }
         }
 
@@ -54,10 +46,13 @@ public abstract class Door extends GameMap.MapUnit {
     }
 
     public static class Automatic extends Door {
-
         @Override
-        public Ansi render() {
-            return ansi().a("\uD83D\uDEAA");
+        public View render() {
+            if (isAllowCrossing()) {
+                return new View(Paint.BLACK_BRIGHT,Paint.BLACK,'k',false);
+            } else {
+                return new View(Paint.BLACK_BRIGHT,Paint.BLUE_BRIGHT,'A',true);
+            }
         }
     }
 }

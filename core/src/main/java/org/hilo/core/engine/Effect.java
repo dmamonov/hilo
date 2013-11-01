@@ -1,13 +1,11 @@
 package org.hilo.core.engine;
 
-import org.fusesource.jansi.Ansi;
-
 /**
  * @author dmitry.mamonov
  *         Created: 10/31/13 11:21 PM
  */
 public abstract class Effect extends GameMap.MapUnit {
-    protected int countdown = 5;
+    protected int countdown = 15;
 
     @Override
     public void onTick() {
@@ -21,26 +19,21 @@ public abstract class Effect extends GameMap.MapUnit {
         return true;
     }
 
-    @Override
-    public final Ansi render() {
-        return null;
-    }
-
     public static class Blood extends Effect {
         @Override
-        public Ansi renderBackground() {
-            if (countdown%2==0) {
-                return Ansi.ansi().bg(Ansi.Color.RED);
-            } else {
-                return Ansi.ansi().bgBright(Ansi.Color.RED);
-            }
+        public View render() {
+            return new View(countdown % 2 == 0 ? Paint.RED : Paint.RED_BRIGHT, null, null, false);
         }
+
     }
 
     public static class Explosion extends Effect {
         @Override
-        public Ansi renderBackground() {
-            return Ansi.ansi().bgBright(countdown % 2 == 0 ? Ansi.Color.YELLOW : Ansi.Color.RED);
+        public View render() {
+            return new View(
+                    countdown % 2 == 0 ? Paint.YELLOW_BRIGHT : Paint.RED_BRIGHT,
+                    countdown % 2 == 0 ? Paint.RED : Paint.YELLOW,
+                    null, false);
         }
     }
 
@@ -48,10 +41,12 @@ public abstract class Effect extends GameMap.MapUnit {
         {
             countdown = 25;
         }
+
         @Override
-        public Ansi renderBackground() {
-            return Ansi.ansi().bgBright(countdown % 2 == 0 ? Ansi.Color.WHITE : Ansi.Color.BLACK);
+        public View render() {
+            return new View(countdown % 2 == 0 ? Paint.WHITE_BRIGHT : Paint.BLACK_BRIGHT, null, null, false);
         }
+
     }
 
 }

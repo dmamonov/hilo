@@ -3,13 +3,10 @@ package org.hilo.core.engine;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
-import org.fusesource.jansi.Ansi;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static org.fusesource.jansi.Ansi.ansi;
 
 /**
  * @author dmitry.mamonov
@@ -28,8 +25,8 @@ public abstract class Transport extends GameMap.MapUnit {
         }
 
         @Override
-        public Ansi render() {
-            return ansi().a('H');
+        public View render() {
+            return new View(null, null, 'H', false);
         }
     }
 
@@ -45,8 +42,8 @@ public abstract class Transport extends GameMap.MapUnit {
         }
 
         @Override
-        public Ansi render() {
-            return ansi().a('-');
+        public View render() {
+            return new View(null, null, '-', false);
         }
     }
 
@@ -74,8 +71,8 @@ public abstract class Transport extends GameMap.MapUnit {
         }
 
         @Override
-        public Ansi render() {
-            return ansi().fg(Ansi.Color.BLUE).a('^');
+        public View render() {
+            return new View(null, Paint.BLUE, '^', false);
         }
     }
 
@@ -113,8 +110,8 @@ public abstract class Transport extends GameMap.MapUnit {
         }
 
         @Override
-        public Ansi render() {
-            return ansi().fg(Ansi.Color.GREEN).a('>');
+        public View render() {
+            return new View(null, Paint.GREEN, '>', false);
         }
 
     }
@@ -124,9 +121,10 @@ public abstract class Transport extends GameMap.MapUnit {
         protected GameMap.Direction getDirection() {
             return GameMap.Direction.Left;
         }
+
         @Override
-        public Ansi render() {
-            return ansi().fg(Ansi.Color.GREEN).a('<');
+        public View render() {
+            return new View(null, Paint.GREEN, '<', false);
         }
 
     }
@@ -148,7 +146,6 @@ public abstract class Transport extends GameMap.MapUnit {
         }
 
 
-
     }
 
     public static class TravelatorRight extends AbstractTravelator {
@@ -158,8 +155,8 @@ public abstract class Transport extends GameMap.MapUnit {
         }
 
         @Override
-        public Ansi render() {
-            return ansi().fg(Ansi.Color.BLUE).a('>');
+        public View render() {
+            return new View(null, Paint.BLUE, '>', false);
         }
     }
 
@@ -170,20 +167,20 @@ public abstract class Transport extends GameMap.MapUnit {
         }
 
         @Override
-        public Ansi render() {
-            return ansi().fg(Ansi.Color.BLUE).a('<');
+        public View render() {
+            return new View(null, Paint.BLUE, '<', false);
         }
     }
 
     public static class Lift extends Transport {
 
         @Override
-        public Ansi render() {
-            return ansi().a('_');
+        public View render() {
+            return new View(null, null, '_', false);
         }
     }
 
-    public static class Teleport extends Transport implements Usable{
+    public static class Teleport extends Transport implements Usable {
         @Inject
         protected GameTime time;
 
@@ -193,15 +190,15 @@ public abstract class Transport extends GameMap.MapUnit {
         }
 
         @Override
-        public Ansi render() {
-            return ansi().a('T');
+        public View render() {
+            return new View(null, null, 'T', true);
         }
 
 
         @Override
         public boolean use(final Actor actor) {
             final List<Teleport> gates = new ArrayList<>(Sets.difference(ImmutableSet.copyOf(map.list(Teleport.class)), ImmutableSet.of(this)));
-            if (gates.size()>0) {
+            if (gates.size() > 0) {
                 Collections.shuffle(gates);
                 final Teleport gate = gates.get(0);
                 map.remove(actor);

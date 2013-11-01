@@ -1,22 +1,36 @@
 package org.hilo.core.engine;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import org.fusesource.jansi.Ansi;
+import org.hilo.core.utils.LinkedHashMapList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+import javax.inject.Named;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.instanceOf;
 import static com.google.common.collect.Iterables.*;
@@ -27,7 +41,7 @@ import static com.google.common.collect.Iterables.*;
  */
 @Singleton
 public class GameMap {
-
+    private final Logger log = LoggerFactory.getLogger(GameMap.class);
 
     public enum Direction {
         Left(-1, 0) {
@@ -121,19 +135,8 @@ public class GameMap {
         }
     }
 
-    private final Map<Position, List<MapUnit>> map = new HashMap<Position, List<MapUnit>>() {
-        @Override
-        public List<MapUnit> get(final Object key) {
-            final List<MapUnit> existingResult = super.get(key);
-            if (existingResult != null) {
-                return existingResult;
-            } else {
-                final List<MapUnit> createdResult = new ArrayList<>();
-                put((Position) key, createdResult);
-                return createdResult;
-            }
-        }
-    };
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    private final Map<Position, List<MapUnit>> map = new LinkedHashMapList<>();
     private final Set<MapUnit> lastFalls = new HashSet<>();
 
     private final List<Runnable> actions = new ArrayList<>();
@@ -147,9 +150,16 @@ public class GameMap {
     @Inject
     private DirectionProvider directionProvider;
     @Inject
+    private NameProvider nameProvider;
+    @Inject
     protected GameTime time;
     private int width;
     private int height;
+
+    public GameMap setName(final String name) {
+        nameProvider.set(name);
+        return this;
+    }
 
     public <T extends MapUnit> T create(final Class<T> type) {
         final T mapObject = injector.getInstance(type);
@@ -184,6 +194,16 @@ public class GameMap {
     public <T extends MapUnit> Iterable<T> list(final Class<T> filter) {
         //noinspection unchecked
         return (Iterable<T>) unmodifiableIterable(filter(concat(map.values()), instanceOf(filter)));
+    }
+
+    public <T extends MapUnit> Iterable<T> list(final Class<T> filter, final String name) {
+        //noinspection unchecked
+        return (Iterable<T>) unmodifiableIterable(filter(filter(concat(map.values()), instanceOf(filter)), new Predicate<MapUnit>() {
+            @Override
+            public boolean apply(final MapUnit unit) {
+                return Objects.equal(unit.getName(), name);
+            }
+        }));
     }
 
 
@@ -256,7 +276,7 @@ public class GameMap {
         }
     }
 
-    public boolean isAllowCrossing(final Position position){
+    public boolean isAllowCrossing(final Position position) {
         for (final MapUnit unit : map.get(position)) {
             if (!unit.isAllowCrossing()) {
                 return false;
@@ -265,7 +285,7 @@ public class GameMap {
         return true;
     }
 
-    public boolean isHold(final Position position){
+    public boolean isHold(final Position position) {
         for (final MapUnit unit : map.get(position)) {
             if (unit.isHold()) {
                 return true;
@@ -286,42 +306,28 @@ public class GameMap {
     }
 
     public String render() {
-        final StringBuilder result = new StringBuilder();
+        final Ansi ansi = Ansi.ansi();
         for (int y = height - 1; y >= 0; y--) {
             for (int x = 0; x < width; x++) {
-                final List<MapUnit> units = map.get(new Position(x, y));
-                if (units.isEmpty()) {
-                    result.append(' ');
-                } else {
-                    for (final MapUnit unit : units) {
-                        final Ansi background = unit.renderBackground();
-                        if (background != null) {
-                            result.append(background);
-                            break;
-                        }
+                final MapUnit.View unitView = new MapUnit.View(null, null, null, false);
+                final List<MapUnit> unitList = map.get(new Position(x, y));
+                try {
+                    for (final MapUnit unit : unitList) {
+                        unitView.join(unit.render());
                     }
-                    boolean drawBlank = true;
-                    for (final MapUnit unit : Lists.reverse(units)) {
-                        final Ansi rendered = unit.render();
-                        if (rendered != null) {
-                            result.append(rendered.reset());
-                            drawBlank = false;
-                            break;
-                        }
-                    }
-                    if (drawBlank) {
-                        result.append(Ansi.ansi().a(' ').reset());
-                    }
+                } catch (RuntimeException re) {
+                    re.printStackTrace();
                 }
+                unitView.render(ansi);
             }
-            result.append("\r\n");
+            ansi.newline();
         }
-        return result.toString();
+        return ansi.toString();
     }
 
-    public void init(final int width, final int height, final Iterable<String> lines) {
+    public void init(final int width, final List<String> lines) {
         this.width = width;
-        this.height = height;
+        this.height = lines.size();
         final Map<Character, Class<? extends MapUnit>> mapping = ImmutableMap.<Character, Class<? extends MapUnit>>builder()
                 .put('P', Actor.Player.class)
                 .put('E', Actor.Enemy.class)
@@ -342,28 +348,78 @@ public class GameMap {
                 .put('X', Block.Box.class)
                 .put('S', Block.Sand.class)
                 .build();
-        if (lines != null) {
-            int y = 0;
-            for (final String line : Lists.reverse(ImmutableList.copyOf(lines))) {
-                if (y >= height) {
-                    break;
-                } else {
-                    int x = 0;
-                    for (final char ch : line.toCharArray()) {
-                        if (x >= width) {
-                            break;
+        int y = 0;
+        for (final String line : Lists.reverse(ImmutableList.copyOf(lines))) {
+            if (y >= height) {
+                break;
+            } else {
+                int x = 0;
+                final String namingPart = (line.length() > width ? line.substring(width) : "").trim();
+                @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+                final Map<Character, List<String>> knownNames = new LinkedHashMapList<>();
+                if (!namingPart.isEmpty()) {
+                    for (final String name : namingPart.split("\\s+")) {
+                        if (name.length() >= 3 && name.substring(1, 2).equals("=")) {
+                            final Character key = name.charAt(0);
+                            final String named = name.substring(2);
+                            knownNames.get(key).add(named);
                         } else {
-                            if (mapping.containsKey(ch)) {
-                                set(new Position(x, y)).create(mapping.get(ch));
-                            }
-                            x++;
+                            log.error("Bad name '" + name + "' at line: " + line);
                         }
                     }
-                    y++;
                 }
+                for (final char ch : line.toCharArray()) {
+                    if (x >= width) {
+                        break;
+                    } else {
+                        if (mapping.containsKey(ch)) {
+                            final List<String> nameList = knownNames.get(ch);
+                            if (nameList.size() > 0) {
+                                final String useName = nameList.remove(0);
+                                setName(useName);
+                            }
+                            set(new Position(x, y)).create(mapping.get(ch));
+                        }
+                        x++;
+                    }
+                }
+                y++;
             }
         }
         applyOperations();
+    }
+
+    public void debug() throws IOException {
+        final StringBuilder html = new StringBuilder("<html>\n" +
+                "<head>\n" +
+                "    <meta charset=\"utf-8\">\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "<pre>\n");
+        for (int y = height - 1; y >= 0; y--) {
+            for (int x = 0; x < width; x++) {
+                final List<MapUnit> unitList = map.get(new Position(x, y));
+                final MapUnit.View unitView = new MapUnit.View(null, null, null, false);
+                for (final MapUnit unit : unitList) {
+                    unitView.join(unit.render());
+                }
+                final String tipSeparator = "\n - ";
+                unitView.render(html, new Position(x, y) + tipSeparator + Joiner.on(tipSeparator).join(Iterables.transform(unitList, new Function<MapUnit, Object>() {
+                    @Override
+                    public Object apply(final MapUnit unit) {
+                        return unit.getClass().getName() + "#" + fromNullable(unit.getName()).or("" + unit.hashCode());
+                    }
+                })));
+            }
+            html.append("\n");
+        }
+        html.append("</pre>\n" +
+                "</body>\n" +
+                "</html>\n");
+        final File debugFile = new File("debug.html");
+        Files.write(html.toString(), debugFile, Charsets.UTF_8);
+        Desktop.getDesktop().open(debugFile);
+
     }
 
     public synchronized void addAction(final Runnable action) {
@@ -446,12 +502,38 @@ public class GameMap {
         }
     }
 
+    @Singleton
+    protected static class NameProvider implements Provider<String> {
+        private String name;
+
+        @Override
+        public String get() {
+            final String result = name;
+            name = null;
+            return result;
+        }
+
+        public void set(final String name) {
+            this.name = name;
+        }
+    }
+
     public static abstract class MapUnit extends GameObject {
         @Inject
         protected GameMap map;
         @Inject
         private Position position;
 
+        @Inject
+        @Nullable
+        @SuppressWarnings("NullableProblems")
+        @Named("name")
+        private String name;
+
+        @Nullable
+        public String getName() {
+            return name;
+        }
 
         public Position getPosition() {
             return position;
@@ -489,14 +571,111 @@ public class GameMap {
         public void onMove() {
         }
 
-        public Ansi renderBackground() {
-            return null;
-        }
-
-        public abstract Ansi render();
+        public abstract View render();
 
         public interface Movable {
 
+        }
+
+        public enum Paint {
+            BLACK(Ansi.Color.BLACK, false),
+            BLACK_BRIGHT(Ansi.Color.BLACK, true),
+            RED(Ansi.Color.RED, false),
+            RED_BRIGHT(Ansi.Color.RED, true),
+            GREEN(Ansi.Color.GREEN, false),
+            GREEN_BRIGHT(Ansi.Color.GREEN, true),
+            YELLOW(Ansi.Color.YELLOW, false),
+            YELLOW_BRIGHT(Ansi.Color.YELLOW, true),
+            BLUE(Ansi.Color.BLUE, false),
+            BLUE_BRIGHT(Ansi.Color.BLUE, true),
+            MAGENTA(Ansi.Color.MAGENTA, false),
+            MAGENTA_BRIGHT(Ansi.Color.MAGENTA, true),
+            CYAN(Ansi.Color.CYAN, false),
+            CYAN_BRIGHT(Ansi.Color.CYAN, true),
+            WHITE(Ansi.Color.WHITE, false),
+            WHITE_BRIGHT(Ansi.Color.WHITE, true),
+            DEFAULT(Ansi.Color.DEFAULT, false),
+            DEFAULT_BRIGHT(Ansi.Color.DEFAULT, true);
+            private final Ansi.Color color;
+            private final boolean bright;
+
+            private Paint(final Ansi.Color color, final boolean bright) {
+                this.color = color;
+                this.bright = bright;
+            }
+
+            public void bg(final Ansi ansi) {
+                if (bright) {
+                    ansi.bgBright(color);
+                } else {
+                    ansi.bg(color);
+                }
+            }
+
+            public void fg(final Ansi ansi) {
+                if (bright) {
+                    ansi.fgBright(color);
+                } else {
+                    ansi.fg(color);
+                }
+            }
+        }
+
+        public static class View {
+            protected Paint bg;
+            protected Paint fg;
+            protected Character ch;
+            protected boolean bold;
+
+            public View(final Paint bg, final Paint fg, final Character ch, final boolean bold) {
+                this.bg = bg;
+                this.fg = fg;
+                this.ch = ch;
+                this.bold = bold;
+            }
+
+            public void join(final View other) {
+                if (other.bg != null) {
+                    this.bg = other.bg;
+                }
+                if (other.fg != null) {
+                    this.fg = other.fg;
+                }
+                if (other.ch != null) {
+                    this.ch = other.ch;
+                }
+                if (other.bold) {
+                    this.bold = true;
+                }
+            }
+
+            public void render(final Ansi ansi) {
+                if (bg != null) {
+                    bg.bg(ansi);
+                }
+                if (fg != null) {
+                    fg.fg(ansi);
+                }
+                if (bold) {
+                    ansi.bold();
+                }
+                if (ch != null) {
+                    ansi.a(ch);
+                } else {
+                    ansi.a(' ');
+                }
+                ansi.reset();
+            }
+
+            public void render(final StringBuilder html, final String hint) {
+                final Paint fg = fromNullable(this.fg).or(Paint.WHITE);
+                final Paint bg = fromNullable(this.bg).or(Paint.BLACK);
+                html.append(String.format("<span style='color: %s;background: %s;' title='%s'>%s</span>",
+                        (!fg.bright ? "DARK" : "") + fg.color.name(),
+                        (!bg.bright ? "DARK" : "") + bg.color.name(),
+                        hint,
+                        fromNullable(ch).or(' ')));
+            }
         }
     }
 }

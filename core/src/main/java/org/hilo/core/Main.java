@@ -26,19 +26,23 @@ public class Main {
         ssh.start();
         final GameMap map = injector.getInstance(GameMap.class);
         final GameRenderer renderer = injector.getInstance(GameRenderer.class);
-        map.init(73, 21, Files.readAllLines(new File("../core/demo-map-01.txt").getAbsoluteFile().toPath(), US_ASCII));
-        if (System.getProperty("os.name").toLowerCase().contains("windows")){
-            Runtime.getRuntime().exec("putty.exe -load 1  me@localhost");
-        }
+        map.init(73, Files.readAllLines(new File("../core/demo-map-01.txt").getAbsoluteFile().toPath(), US_ASCII));
+        debugWithPutty();
         final GameTime time = injector.getInstance(GameTime.class);
         final AI ai = injector.getInstance(AI.Randomized.class);
         //noinspection InfiniteLoopStatement
         while (true){
             Thread.sleep(100L);
             time.tick();
-            ai.think();
+            ai.think(null);
             map.applyOperations();
-            renderer.update();
+            renderer.render();
+        }
+    }
+
+    public static void debugWithPutty() throws IOException {
+        if (System.getProperty("os.name").toLowerCase().contains("windows")){
+            Runtime.getRuntime().exec("putty.exe -load 1  me@localhost");
         }
     }
 }

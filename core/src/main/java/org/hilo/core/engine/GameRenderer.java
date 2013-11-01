@@ -45,7 +45,7 @@ public class GameRenderer {
         return lastView;
     }
 
-    public void update() {
+    public void render() {
         lastView = new View(
                 map.render() +
                         Joiner.on("\r\n").join(map.list(Actor.Player.class)) + "\r\n" +
