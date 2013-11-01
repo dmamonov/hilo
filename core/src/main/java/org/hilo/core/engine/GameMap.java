@@ -337,6 +337,8 @@ public class GameMap {
                 .put('H', Transport.Ladder.class)
                 .put('-', Transport.Rope.class)
                 .put('^', Transport.Elevator.class)
+                .put('}', Transport.PushRight.class)
+                .put('{', Transport.PushLeft.class)
                 .put('X', Block.Box.class)
                 .put('S', Block.Sand.class)
                 .build();

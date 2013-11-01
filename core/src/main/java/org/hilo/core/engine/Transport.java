@@ -79,6 +79,59 @@ public abstract class Transport extends GameMap.MapUnit {
         }
     }
 
+    public static abstract class AbstractPush extends Transport {
+        @Inject
+        protected GameTime time;
+
+        @Override
+        public boolean isAllowCrossing() {
+            return true;
+        }
+
+        @Override
+        public boolean isHold() {
+            return true;
+        }
+
+        @Override
+        public void onTick() {
+            if (time.getClock() % 3 == 0) {
+                for (final Movable movable : map.list(getPosition(), Movable.class)) {
+                    map.move((GameMap.MapUnit) movable, getDirection());
+                }
+            }
+        }
+
+
+        protected abstract GameMap.Direction getDirection();
+    }
+
+    public static class PushRight extends AbstractPush {
+        @Override
+        protected GameMap.Direction getDirection() {
+            return GameMap.Direction.Right;
+        }
+
+        @Override
+        public Ansi render() {
+            return ansi().fg(Ansi.Color.GREEN).a('>');
+        }
+
+    }
+
+    public static class PushLeft extends AbstractPush {
+        @Override
+        protected GameMap.Direction getDirection() {
+            return GameMap.Direction.Left;
+        }
+        @Override
+        public Ansi render() {
+            return ansi().fg(Ansi.Color.GREEN).a('<');
+        }
+
+    }
+
+
     static abstract class AbstractTravelator extends Transport {
         @Inject
         protected GameTime time;
