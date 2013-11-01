@@ -10,38 +10,42 @@ import static org.fusesource.jansi.Ansi.ansi;
 *         Created: 10/31/13 10:57 PM
 */
 public abstract class Door extends GameMap.MapUnit {
-    protected boolean locked = true;
 
-    @Override
-    public boolean isAllowCrossing() {
-        return !locked;
-    }
 
     public static class Locked extends Door implements Usable {
+        private Thing.Key key = null;
         @Override
         public Ansi renderBackground() {
             return ansi().bgBright(Ansi.Color.BLACK);
         }
 
         @Override
+        public boolean isAllowCrossing() {
+            return key!=null;
+        }
+
+
+        @Override
         public Ansi render() {
-            final Ansi ansi = ansi();
-            if (locked) {
-                ansi.fgBright(Ansi.Color.BLUE);
+            if (!isAllowCrossing()) {
+                return ansi().fgBright(Ansi.Color.BLUE).bold().a('D');
             } else {
-                ansi.fg(Ansi.Color.BLACK);
+                return ansi().fg(Ansi.Color.BLACK).a('k');
 
             }
-            return ansi.bold().a('D');
         }
 
         @Override
         public boolean use(final Actor actor) {
-            if (locked){
+            if (key!=null) {
+                actor.getThings().add(key);
+                key = null;
+                return true;
+            } else {
                 final Thing.Key key = Iterables.getFirst(Iterables.filter(actor.getThings(), Thing.Key.class), null);
-                if (key!=null) {
+                if (key != null) {
                     actor.getThings().remove(key);
-                    locked =false;
+                    this.key = key;
                     return true;
                 }
             }
