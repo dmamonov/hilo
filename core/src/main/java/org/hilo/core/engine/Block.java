@@ -43,7 +43,17 @@ public abstract class Block extends GameMap.MapUnit {
         }
     }
 
-    public static class Box extends Block implements Movable{
+    public static class Box extends Block implements Movable, Damageable{
+        private int health = 500;
+
+        @Override
+        public void damage(final int damage) {
+            health-=damage;
+            if (health<=0){
+                map.remove(this);
+            }
+        }
+
         @Override
         public boolean isFall() {
             return true;
