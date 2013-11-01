@@ -44,5 +44,14 @@ public abstract class Effect extends GameMap.MapUnit {
         }
     }
 
+    public static class Appear extends Effect {
+        {
+            countdown = 15;
+        }
+        @Override
+        public Ansi renderBackground() {
+            return Ansi.ansi().bgBright(countdown % 2 == 0 ? Ansi.Color.WHITE : Ansi.Color.BLACK);
+        }
+    }
 
 }

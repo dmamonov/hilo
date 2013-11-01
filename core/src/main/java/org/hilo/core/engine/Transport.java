@@ -155,7 +155,9 @@ public abstract class Transport extends GameMap.MapUnit {
                 time.scheduled(100, new Runnable() {
                     @Override
                     public void run() {
-                        map.set(gate.getPosition()).put(actor);
+                        map.set(gate.getPosition());
+                        map.put(actor);
+                        map.create(Effect.Appear.class);
                     }
                 });
                 return true;

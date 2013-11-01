@@ -44,7 +44,7 @@ public abstract class Ammo extends GameMap.MapUnit {
         }
     }
 
-    protected void makeDamage(final List<GameMap.MapUnit> collisions) {
+    protected void makeDamage(final Iterable<GameMap.MapUnit> collisions) {
         for (final Damageable damageable : Iterables.filter(collisions, Damageable.class)) {
             damageable.damage(getDamage());
         }
@@ -111,7 +111,9 @@ public abstract class Ammo extends GameMap.MapUnit {
 
         @Override
         public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
-            makeDamage(collisions);
+            for(final GameMap.Direction around: GameMap.Direction.values()){
+                makeDamage(map.list(getPosition().translate(around)));
+            }
             map.remove(this);
             terminate();
         }
@@ -143,7 +145,9 @@ public abstract class Ammo extends GameMap.MapUnit {
 
         @Override
         public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
-            makeDamage(collisions);
+            for(final GameMap.Direction around: GameMap.Direction.values()){
+                makeDamage(map.list(getPosition().translate(around)));
+            }
             map.remove(this);
             terminate();
         }

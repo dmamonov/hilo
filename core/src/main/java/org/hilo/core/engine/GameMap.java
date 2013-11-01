@@ -338,6 +338,7 @@ public class GameMap {
                 .put('-', Transport.Rope.class)
                 .put('^', Transport.Elevator.class)
                 .put('X', Block.Box.class)
+                .put('S', Block.Sand.class)
                 .build();
         if (lines != null) {
             int y = 0;

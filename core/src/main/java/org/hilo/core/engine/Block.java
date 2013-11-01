@@ -26,7 +26,17 @@ public abstract class Block extends GameMap.MapUnit {
         }
     }
 
-    public static class Sand extends Block {
+    public static class Sand extends Block implements Damageable {
+        private int health = 50;
+
+        @Override
+        public void damage(final int damage) {
+            health-=damage;
+            if (health<=0){
+                map.remove(this);
+            }
+        }
+
         @Override
         public Ansi render() {
             return ansi().a('░');

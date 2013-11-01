@@ -6,7 +6,7 @@ W   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>               >>>>>>>W     W
 W      *                                                               W
 W             K K --       ><<<<<<<<<<<<<<<<<<<<                       W
 W               W  ^            T                                      W
-W                  ^            D      E           K   _  D            W
+W                  ^            D      E           K   _S D            W
 W        *         ^            WWWWWWWWWWWWWWWWWWWWWWWWWWWW           W
 W          X       ^                                                   W
 W                  ^        >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>      W
@@ -17,5 +17,5 @@ W                  ^                    *         *                    W
 W                  ^                                                   W
 W                  ^      H-----------------------------------T        W
 W        W         -------HW                                  W        W
-W   E    D  K P T D    E EKD         _                                TW
+W   E    D  K P T D    E EKD         _ SSS    SSSSSS                  TW
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
