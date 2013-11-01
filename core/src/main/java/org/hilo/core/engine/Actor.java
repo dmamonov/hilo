@@ -194,12 +194,12 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
 
         @Override
         public String toString() {
-            return ansi().a("Player" + hashCode() + ": " + status).newline()
-                    .a("xy" + getPosition()).newline()
-                    .a("Health: ").fgBright(RED).a(health).reset().newline()
-                    .a("Weapons Primary: ").fgBright(WHITE).a(tool).reset().newline()
-                    .a("      Secondary: ").a(otherTool).newline()
-                    .a("Bag: ").fg(BLUE).a(things).reset().newline().toString();
+            return ansi().a("Player" + hashCode() + ": " + status).a(GameRenderer.LINE_BREAK)
+                    .a("xy" + getPosition()).a(GameRenderer.LINE_BREAK)
+                    .a("Health: ").fgBright(RED).a(health).reset().a(GameRenderer.LINE_BREAK)
+                    .a("Weapons Primary: ").fgBright(WHITE).a(tool).reset().a(GameRenderer.LINE_BREAK)
+                    .a("      Secondary: ").a(otherTool).a(GameRenderer.LINE_BREAK)
+                    .a("Bag: ").fg(BLUE).a(things).reset().a(GameRenderer.LINE_BREAK).toString();
         }
     }
 

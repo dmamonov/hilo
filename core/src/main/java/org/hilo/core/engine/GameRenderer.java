@@ -11,6 +11,7 @@ import com.google.inject.Singleton;
  */
 @Singleton
 public class GameRenderer {
+    public static final String LINE_BREAK = "\r\n";
     @Inject
     protected GameMap map;
     @Inject
