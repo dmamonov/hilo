@@ -12,8 +12,10 @@ import org.fusesource.jansi.Ansi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.instanceOf;
@@ -78,20 +80,44 @@ public class GameMap {
     }
 
     private static class MapOperation {
-        private final MapUnit object;
+        private final MapUnit unit;
+        private final boolean fall;
+        private final boolean create;
         private final Direction moveTo;
 
-        private MapOperation(final MapUnit object, final Direction moveTo) {
-            this.object = object;
+        private MapOperation(final MapUnit unit, final Direction moveTo, final boolean create, final boolean fall) {
+            this.unit = unit;
             this.moveTo = moveTo;
+            this.fall = fall;
+            this.create = create;
         }
 
-        private MapUnit getObject() {
-            return object;
+        public static MapOperation move(final MapUnit unit, final Direction moveTo) {
+            return new MapOperation(unit, moveTo, false, false);
+        }
+
+        public static MapOperation fall(final MapUnit unit) {
+            return new MapOperation(unit, Direction.Down, false, true);
+        }
+
+        public static MapOperation create(final MapUnit unit) {
+            return new MapOperation(unit, Direction.Center, true, false);
+        }
+
+        private boolean isCreate() {
+            return create;
+        }
+
+        private MapUnit getUnit() {
+            return unit;
         }
 
         private Direction getMoveTo() {
             return moveTo;
+        }
+
+        private boolean isFall() {
+            return fall;
         }
     }
 
@@ -108,6 +134,7 @@ public class GameMap {
             }
         }
     };
+    private final Set<MapUnit> lastFalls = new HashSet<>();
 
     private final List<Runnable> actions = new ArrayList<>();
     private final List<MapOperation> operations = new ArrayList<>();
@@ -126,19 +153,19 @@ public class GameMap {
 
     public <T extends MapUnit> T create(final Class<T> type) {
         final T mapObject = injector.getInstance(type);
-        operations.add(new MapOperation(mapObject, null));
+        operations.add(MapOperation.create(mapObject));
         return mapObject;
     }
 
     public void put(final MapUnit unit) {
         unit.setPosition(positionProvider.get());
-        operations.add(new MapOperation(unit, null));
+        operations.add(MapOperation.create(unit));
     }
 
     public GameMap move(final MapUnit obj, final Direction moveTo) {
         checkNotNull(obj);
         checkNotNull(moveTo);
-        operations.add(new MapOperation(obj, moveTo));
+        operations.add(MapOperation.move(obj, moveTo));
         return this;
     }
 
@@ -176,9 +203,9 @@ public class GameMap {
         final ImmutableList<MapOperation> currentOperations = ImmutableList.copyOf(operations);
         operations.clear();
         for (final MapOperation operation : currentOperations) {
-            final MapUnit unit = operation.getObject();
-            final boolean create = operation.getMoveTo() == null;
-            final Direction moveTo = create ? Direction.Center : operation.getMoveTo();
+            final MapUnit unit = operation.getUnit();
+            final boolean create = operation.isCreate();
+            final Direction moveTo = operation.getMoveTo();
             final List<MapUnit> sourceUnitList = map.get(unit.getPosition());
             final Position targetPosition = unit.getPosition().translate(moveTo);
             final List<MapUnit> targetUnitList = map.get(targetPosition);
@@ -203,23 +230,41 @@ public class GameMap {
                     targetUnitList.add(unit);
                     unit.setPosition(targetPosition);
                     unit.onMove();
+                    if (operation.isFall()) {
+                        lastFalls.add(unit);
+                    }
                 }
             }
         }
+        final boolean doFalls = time.getClock() % 3 == 0;
         for (final MapUnit mapUnit : ImmutableList.copyOf(Iterables.concat(map.values()))) {
             mapUnit.onTick();
-            if (mapUnit.isFall()) {
-                boolean doFall = true;
-                for (final MapUnit underUnit : map.get(mapUnit.getPosition().translate(Direction.Down))) {
-                    if (!underUnit.isAllowCrossing()) {
-                        doFall = false;
-                        break;
+            if (doFalls) {
+                if (mapUnit.isFall()) {
+                    boolean hold = false;
+                    for (final MapUnit sameUnit : map.get(mapUnit.getPosition())) {
+                        if (sameUnit.isHold()){
+                            hold = true;
+                            break;
+                        }
+                    }
+                    if (!hold) {
+                        boolean doFall = true;
+                        for (final MapUnit underUnit : map.get(mapUnit.getPosition().translate(Direction.Down))) {
+                            if (!underUnit.isAllowCrossing()) {
+                                doFall = false;
+                                break;
+                            }
+                        }
+                        if (doFall || lastFalls.contains(mapUnit)) {
+                            operations.add(MapOperation.fall(mapUnit));
+                        }
                     }
                 }
-                if (doFall) {
-                    move(mapUnit, Direction.Down);
-                }
             }
+        }
+        if (doFalls) {
+            lastFalls.clear();
         }
     }
 
@@ -284,6 +329,8 @@ public class GameMap {
                 .put('>', Transport.TravelatorRight.class)
                 .put('<', Transport.TravelatorLeft.class)
                 .put('T', Transport.Teleport.class)
+                .put('H', Transport.Ladder.class)
+                .put('-', Transport.Rope.class)
                 .build();
         if (lines != null) {
             int y = 0;
@@ -328,7 +375,7 @@ public class GameMap {
 
         @SuppressWarnings("RedundantIfStatement")
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) {
                 return true;
             }
@@ -405,6 +452,10 @@ public class GameMap {
         }
 
         public boolean isAllowCrossing() {
+            return false;
+        }
+
+        public boolean isHold() {
             return false;
         }
 

@@ -16,6 +16,40 @@ import static org.fusesource.jansi.Ansi.ansi;
  *         Created: 10/31/13 10:57 PM
  */
 public abstract class Transport extends GameMap.MapUnit {
+    public static class Ladder extends Transport {
+        @Override
+        public boolean isAllowCrossing() {
+            return true;
+        }
+
+        @Override
+        public boolean isHold() {
+            return true;
+        }
+
+        @Override
+        public Ansi render() {
+            return ansi().a('H');
+        }
+    }
+
+    public static class Rope extends Transport {
+        @Override
+        public boolean isAllowCrossing() {
+            return true;
+        }
+
+        @Override
+        public boolean isHold() {
+            return true;
+        }
+
+        @Override
+        public Ansi render() {
+            return ansi().a('-');
+        }
+    }
+
     public static class Elevator extends Transport {
         @Inject
         protected GameMap.Direction direction;
