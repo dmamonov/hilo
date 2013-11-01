@@ -307,6 +307,7 @@ public class GameMap {
 
     public String render() {
         final Ansi ansi = Ansi.ansi();
+        final String lineBreak = "\r\n";
         for (int y = height - 1; y >= 0; y--) {
             for (int x = 0; x < width; x++) {
                 final MapUnit.View unitView = new MapUnit.View(null, null, null, false);
@@ -320,7 +321,7 @@ public class GameMap {
                 }
                 unitView.render(ansi);
             }
-            ansi.newline();
+            ansi.a(lineBreak);
         }
         return ansi.toString();
     }
