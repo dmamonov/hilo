@@ -6,7 +6,7 @@ import org.fusesource.jansi.Ansi;
  * @author dmitry.mamonov
  *         Created: 10/31/13 11:40 PM
  */
-public abstract class Thing extends GameMap.MapUnit {
+public abstract class Thing extends GameMap.MapUnit implements GameMap.MapUnit.Movable{
     @Override
     public boolean isAllowCrossing() {
         return true;

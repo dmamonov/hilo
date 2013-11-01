@@ -67,8 +67,8 @@ public abstract class Transport extends GameMap.MapUnit {
         @Override
         public void onTick() {
             if (time.getClock() % 3 == 0) {
-                for (final Actor actor : map.list(getPosition(), Actor.class)) {
-                    map.move(actor, GameMap.Direction.Up);
+                for (final Movable movable : map.list(getPosition(), Movable.class)) {
+                    map.move((GameMap.MapUnit) movable, GameMap.Direction.Up);
                 }
             }
         }
@@ -88,8 +88,8 @@ public abstract class Transport extends GameMap.MapUnit {
         @Override
         public void onTick() {
             if (time.getClock() % 3 == 0) {
-                for (final Actor actor : map.list(getPosition().translate(GameMap.Direction.Up), Actor.class)) {
-                    map.move(actor, getDirection());
+                for (final Movable movable : map.list(getPosition().translate(GameMap.Direction.Up), Movable.class)) {
+                    map.move((GameMap.MapUnit) movable, getDirection());
                 }
             }
         }

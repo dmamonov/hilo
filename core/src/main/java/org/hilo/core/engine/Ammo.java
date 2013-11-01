@@ -36,7 +36,7 @@ public abstract class Ammo extends GameMap.MapUnit {
     }
 
     @Override
-    public void onCollide(final GameMap.Position position, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
+    public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
         makeDamage(collisions);
         if (!allowCrossing){
             map.remove(this);
@@ -110,7 +110,7 @@ public abstract class Ammo extends GameMap.MapUnit {
         }
 
         @Override
-        public void onCollide(final GameMap.Position position, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
+        public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
             makeDamage(collisions);
             map.remove(this);
             terminate();
@@ -142,7 +142,7 @@ public abstract class Ammo extends GameMap.MapUnit {
         }
 
         @Override
-        public void onCollide(final GameMap.Position position, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
+        public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
             makeDamage(collisions);
             map.remove(this);
             terminate();

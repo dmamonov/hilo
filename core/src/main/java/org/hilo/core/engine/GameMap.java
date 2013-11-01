@@ -214,14 +214,14 @@ public class GameMap {
                 if (!targetUnitList.isEmpty()) {
                     for (final MapUnit targetUnit : targetUnitList) {
                         if (targetUnit.isCollideBack()) {
-                            targetUnit.onCollide(targetPosition, ImmutableList.of(unit), unit.isAllowCrossing());
+                            targetUnit.onCollide(moveTo, ImmutableList.of(unit), unit.isAllowCrossing());
                         }
                         if (!targetUnit.isAllowCrossing()) {
                             allowCrossing = false;
                             break;
                         }
                     }
-                    unit.onCollide(targetPosition, targetUnitList, allowCrossing);
+                    unit.onCollide(moveTo.inverse(), targetUnitList, allowCrossing);
                 }
                 if (allowCrossing || create) {
                     if (!create) {
@@ -337,6 +337,7 @@ public class GameMap {
                 .put('H', Transport.Ladder.class)
                 .put('-', Transport.Rope.class)
                 .put('^', Transport.Elevator.class)
+                .put('X', Block.Box.class)
                 .build();
         if (lines != null) {
             int y = 0;
@@ -478,7 +479,7 @@ public class GameMap {
             return false;
         }
 
-        public void onCollide(final Position position, final List<MapUnit> collisions, final boolean allowCrossing) {
+        public void onCollide(final Direction direction, final List<MapUnit> collisions, final boolean allowCrossing) {
 
         }
 
@@ -490,5 +491,9 @@ public class GameMap {
         }
 
         public abstract Ansi render();
+
+        public interface Movable {
+
+        }
     }
 }

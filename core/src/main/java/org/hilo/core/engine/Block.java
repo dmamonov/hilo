@@ -1,6 +1,9 @@
 package org.hilo.core.engine;
 
+import com.google.common.collect.Iterables;
 import org.fusesource.jansi.Ansi;
+
+import java.util.List;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
@@ -30,7 +33,24 @@ public abstract class Block extends GameMap.MapUnit {
         }
     }
 
-    public static class Box extends Block {
+    public static class Box extends Block implements Movable{
+        @Override
+        public boolean isFall() {
+            return true;
+        }
+
+        @Override
+        public boolean isCollideBack() {
+            return true;
+        }
+
+        @Override
+        public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
+            if (!Iterables.isEmpty(Iterables.filter(collisions, Actor.class))){
+                map.move(this, direction);
+            }
+        }
+
         @Override
         public Ansi render() {
             return ansi().a('\u25A8');

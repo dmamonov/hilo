@@ -15,7 +15,7 @@ import static org.fusesource.jansi.Ansi.ansi;
  * @author dmitry.mamonov
  *         Created: 10/31/13 10:56 PM
  */
-public abstract class Actor extends GameMap.MapUnit implements GameObject.Damageable {
+public abstract class Actor extends GameMap.MapUnit implements GameObject.Damageable, GameMap.MapUnit.Movable {
     protected GameMap.Direction direction = GameMap.Direction.Right;
 
     protected List<Thing> things = new ArrayList<>();
@@ -46,7 +46,7 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
 
 
     @Override
-    public void onCollide(final GameMap.Position position, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
+    public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
         if (allowCrossing) {
             final Iterable<Thing> collidedThings = Iterables.filter(collisions, Thing.class);
             for (final Thing thing : collidedThings) {
@@ -214,8 +214,8 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
         }
 
         @Override
-        public void onCollide(final GameMap.Position position, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
-            super.onCollide(position, collisions, allowCrossing);
+        public void onCollide(final GameMap.Direction direction, final List<GameMap.MapUnit> collisions, final boolean allowCrossing) {
+            super.onCollide(direction, collisions, allowCrossing);
             for (final Damageable damageable : Iterables.filter(collisions, Damageable.class)) {
                 damageable.damage(25);
             }

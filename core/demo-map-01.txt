@@ -1,14 +1,14 @@
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
-W                                                                      W
-W   *    *                                                             W
-W   T  e                                                               W
-W   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>                             W
+W                                                               >      W
+W   *    *                                                      ^W     W
+W   T  e      X                                          X      ^      W
+W   >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>               >>>>>>>W     W
 W      *                                                               W
 W             K K --       ><<<<<<<<<<<<<<<<<<<<                       W
 W               W  ^            T                                      W
 W                  ^            D      E           K   _  D            W
 W        *         ^            WWWWWWWWWWWWWWWWWWWWWWWWWWWW           W
-W                  ^                                                   W
+W          X       ^                                                   W
 W                  ^        >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>      W
 W                  ^                                                   W
 W                  ^     *            <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<W
