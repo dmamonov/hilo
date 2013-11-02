@@ -93,6 +93,7 @@ public class GameMap {
         public abstract Direction inverse();
 
         public static final List<Direction> horizontalDirections = ImmutableList.of(Left, Right);
+        public static final List<Direction> horizontalAndUpDirections = ImmutableList.of(Left, Right,Up);
         public static final List<Direction> verticalDirections = ImmutableList.of(Up, Down);
         public static final List<Direction> allDirections = ImmutableList.of(Right, Down, Left, Up);
 
@@ -353,6 +354,7 @@ public class GameMap {
                 .put('X', Block.Box.class)
                 .put('S', Block.Sand.class)
                 .put('~', Fluid.Water.class)
+                .put('g', Fluid.Gasoline.class)
                 .build();
         int y = 0;
         for (final String line : Lists.reverse(ImmutableList.copyOf(lines))) {
