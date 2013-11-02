@@ -36,10 +36,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>org.hilo.core.Main</mainClass>
+                    <mainClass>org.hilo.map.Map01</mainClass>
                     <arguments>
-                        <argument>foo</argument>
-                        <argument>bar</argument>
+                        <argument>go</argument>
                     </arguments>
                 </configuration>
             </plugin>

@@ -9,11 +9,7 @@ import org.hilo.core.engine.GameRenderer;
 import org.hilo.core.engine.GameTime;
 import org.hilo.core.engine.HiloModule;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-
-import static com.google.common.base.Charsets.US_ASCII;
 
 /**
  * @author dmitry.mamonov
@@ -26,7 +22,7 @@ public class Main {
         ssh.start();
         final GameMap map = injector.getInstance(GameMap.class);
         final GameRenderer renderer = injector.getInstance(GameRenderer.class);
-        map.init(73, Files.readAllLines(new File("../core/demo-map-01.txt").getAbsoluteFile().toPath(), US_ASCII));
+        //map.init(73, Files.readAllLines(new File("../core/demo-map-01.txt").getAbsoluteFile().toPath(), US_ASCII));
         debugWithPutty();
         final GameTime time = injector.getInstance(GameTime.class);
         final AI ai = injector.getInstance(AI.Randomized.class);
