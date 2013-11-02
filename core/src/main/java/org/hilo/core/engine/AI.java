@@ -2,8 +2,7 @@ package org.hilo.core.engine;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import java.util.Random;
+import org.hilo.core.utils.Rnd;
 
 /**
  * @author dmitry.mamonov
@@ -19,7 +18,8 @@ public abstract class AI extends GameObject {
         protected GameMap map;
         @Inject
         protected GameTime time;
-        protected final Random random = new Random();
+        @Inject
+        protected Rnd rnd;
 
         @Override
         public void think(final Character mind) {

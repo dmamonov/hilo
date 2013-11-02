@@ -41,6 +41,11 @@ public abstract class Actor extends GameMap.MapUnit implements GameObject.Damage
     }
 
     @Override
+    public boolean isHoldOn() {
+        return true;
+    }
+
+    @Override
     public boolean isCollideBack() {
         return true;
     }

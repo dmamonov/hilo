@@ -91,6 +91,11 @@ public class GameMap {
         }
 
         public abstract Direction inverse();
+
+        public static final List<Direction> horizontalDirections = ImmutableList.of(Left, Right);
+        public static final List<Direction> verticalDirections = ImmutableList.of(Up, Down);
+        public static final List<Direction> allDirections = ImmutableList.of(Right, Down, Left, Up);
+
     }
 
     private static class MapOperation {
@@ -261,7 +266,7 @@ public class GameMap {
             unit.onTick();
             if (doFalls) {
                 if (unit.isFall()) {
-                    final boolean holdStill = isHold(unit.getPosition());
+                    final boolean holdStill = isHold(unit.getPosition()) && unit.isHoldOn();
                     if (!holdStill) {
                         final boolean doFall = isAllowCrossing(unit.getPosition().translate(Direction.Down));
                         if (doFall || lastFalls.contains(unit)) {
@@ -347,6 +352,7 @@ public class GameMap {
                 .put('{', Transport.PushLeft.class)
                 .put('X', Block.Box.class)
                 .put('S', Block.Sand.class)
+                .put('~', Fluid.Water.class)
                 .build();
         int y = 0;
         for (final String line : Lists.reverse(ImmutableList.copyOf(lines))) {
@@ -548,6 +554,10 @@ public class GameMap {
         }
 
         public boolean isHold() {
+            return false;
+        }
+
+        public boolean isHoldOn() {
             return false;
         }
 

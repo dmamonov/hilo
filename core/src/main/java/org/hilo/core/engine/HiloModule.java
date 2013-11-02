@@ -4,6 +4,7 @@ import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.name.Names;
 import org.apache.sshd.SshServer;
+import org.hilo.core.utils.Rnd;
 
 /**
  * @author dmitry.mamonov
@@ -17,6 +18,7 @@ public class HiloModule implements Module {
         binder.bind(GameMap.Position.class).toProvider(GameMap.PositionProvider.class);
         binder.bind(GameMap.Direction.class).toProvider(GameMap.DirectionProvider.class);
         binder.bind(String.class).annotatedWith(Names.named("name")).toProvider(GameMap.NameProvider.class);
+        binder.bind(Rnd.class).toInstance(new Rnd());
     }
 
 
