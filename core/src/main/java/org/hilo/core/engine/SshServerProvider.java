@@ -131,7 +131,9 @@ public class SshServerProvider implements Provider<SshServer> {
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
-                                    System.exit(0);
+                                    if (System.getProperty("os.name").toLowerCase().contains("windows")){
+                                        System.exit(0);
+                                    }
                                 }
                             }
                         }.start();
