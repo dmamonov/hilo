@@ -1,0 +1,1 @@
+mvn install:install-file -DgroupId=processing -DartifactId=core -Dversion=2.1 -Dpackaging=jar -Dfile=core-2.1.jar -DcreateChecksum=true

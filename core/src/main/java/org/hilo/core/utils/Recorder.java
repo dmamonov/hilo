@@ -19,6 +19,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -28,13 +29,15 @@ import static com.google.common.base.Preconditions.*;
  */
 public class Recorder {
     public static <R> R recorder(final Class<R> clazz, final DataOutput tape) {
-        return clazz.cast(Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz}, new InvocationHandler() {
+        final AtomicReference<R> self = new AtomicReference<>(null);
+        final R result = clazz.cast(Proxy.newProxyInstance(clazz.getClassLoader(), new Class[]{clazz}, new InvocationHandler() {
             private final TreeMap<String, Integer> methods = new TreeMap<>();
 
             {
                 int index = 0;
                 for (final Method method : clazz.getMethods()) {
-                    if (method.getReturnType() == Void.TYPE) {
+                    final Class<?> returnType = method.getReturnType();
+                    if (returnType == Void.TYPE || returnType == clazz) {
                         checkState(!methods.containsKey(method.getName()));
                         methods.put(method.getName(), index++);
                     }
@@ -53,7 +56,8 @@ public class Recorder {
 
             @Override
             public Object invoke(final Object o, final Method method, final Object[] objects) throws Throwable {
-                checkArgument(method.getReturnType() == Void.TYPE);
+                final Class<?> returnType = method.getReturnType();
+                checkArgument(returnType == Void.TYPE ||returnType==clazz);
                 final String methodName = method.getName();
                 tape.writeInt(checkNotNull(methods.get(methodName), methodName));
                 if (objects != null) {
@@ -73,9 +77,15 @@ public class Recorder {
                         }
                     }
                 }
-                return null;
+                if (returnType == clazz) {
+                    return self.get();
+                } else {
+                    return null;
+                }
             }
         }));
+        self.set(result);
+        return result;
     }
 
     public static <R> void play(final Class<R> clazz, final R face, final DataInput tape) {
@@ -130,34 +140,37 @@ public class Recorder {
 
 
     private interface TestFace {
-        void newLine();
+        TestFace newLine();
 
-        void print(String value);
+        TestFace print(String value);
 
-        void printPosition(int x, int y);
+        TestFace printPosition(int x, int y);
     }
 
     public static void main(final String[] args) {
         final ByteArrayOutputStream tapeBuffer = new ByteArrayOutputStream();
         final TestFace recorder = recorder(TestFace.class, new DataOutputStream(tapeBuffer));
-        recorder.print("Hello at position: ");
-        recorder.printPosition(100, 100);
-        recorder.newLine();
-        recorder.print("That's it");
+        recorder.print("Hello at position: ")
+                .printPosition(100, 100)
+                .newLine()
+                .print("That's it");
         play(TestFace.class, new TestFace() {
             @Override
-            public void newLine() {
+            public TestFace newLine() {
                 System.out.println();
+                return this;
             }
 
             @Override
-            public void print(final String value) {
+            public TestFace print(final String value) {
                 System.out.print(value);
+                return this;
             }
 
             @Override
-            public void printPosition(final int x, final int y) {
+            public TestFace printPosition(final int x, final int y) {
                 System.out.print(String.format("(%d,%d)", x, y));
+                return this;
             }
         }, new DataInputStream(new ByteArrayInputStream(tapeBuffer.toByteArray())));
     }
