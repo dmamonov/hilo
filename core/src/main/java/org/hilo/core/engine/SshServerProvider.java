@@ -56,7 +56,6 @@ public class SshServerProvider implements Provider<SshServer> {
                             @Override
                             public void run() {
                                 try {
-                                    final Actor.Player player = firstPlayer();
                                     while (true) {
                                         final int ch = in.read();
 
@@ -64,6 +63,7 @@ public class SshServerProvider implements Provider<SshServer> {
                                             break;
                                         } else {
                                             final char key = Character.toUpperCase((char) ch);
+                                            final Actor.Player player = firstPlayer();
                                             if (player != null) {
                                                 map.addAction(new Runnable() {
                                                     @Override
